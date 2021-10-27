@@ -11,36 +11,28 @@ app.get("/", (_, res) => res.render("home"));
 app.get("/*", (_, res) => res.redirect("/")); 
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
-// ws://localhost:3000도 처리할수있게됨
-// 이제 이 localhost는 동일한 포트에서 http, ws request 두개를 다 처리할수 있음
 
 const server = http.createServer(app); //express.js를 이용해 http서버 만듬. 이제 서버에서 websocket을 만들수있음
 const wss = new WebSocket.Server({ server }); //http서버 위에 websocket서버 만듬. (server를 꼭 넣어줄 필요는 없음)
 
-function handleConnection(socket){
-    console.log(socket); //frontend랑 backend를 연결해달라고 해야 console에서 socket을 볼 수 있음. 지금은 연결된게 없어서 확인불가
-    //여기있는 socket이 frontend와 실시간으로 소통할 수 있어
-    // server.js의 socket은 브라우저와의 연결
-}
-wss.on("connection", handleConnection);
-//on 메서드는 event가 발동하는걸 기다려 -> 그 이벤트가 여기서는 connetction. 그리고 커넥션이 이루어지면 function을 작동시켜
-//     그리고 backend에 연결된 사람의 정보를 제공. 그게 socket에서 옴
-//socket : 연결된 브라우저와의 contact(연락)라인. 소켓을 이용하여 메세지를 주고받을수있어 나(서버)와 브라우저와의 연결
-//      이 소켓을 저장해야 handelConnection(socket) 해줄수있어
+wss.on("connection", (socket) => {
+    //console.log(socket);
 
+    // ** socket에 있는 메서드로 브라우저에 "Welcome to Chat" 메세지를 보내보자
+    console.log("Connected to Browser ✅")
+    socket.send("hello~");
+    //connection이 생겼을 때 socket으로 즉시 메세지(hello)를 보낼거고
+    // app.js에서 세개의 이벤트(open, message, close) 작동
+
+}); // 커넥션이 생기면 sokcet을 받는 다는게 직관적으로 보임
+
+//function handleConnection(socket){console.log(socket); // server.js의 socket은 브라우저와의 연결}
+//wss.on("connection", handleConnection);
+//Nico doesn't like this way. 하나의 큰 function안에 기능들을 넣는걸 선호.
+// connection안에 같은 역할을 하는 익명 함수를 만들거임 -> socket이 지금 어떤 상태인지 알기 더 쉬움
 
 
 server.listen(3000, handleListen);
-
-//http와 wss 반드시 합칠필요는 없어 websocket만 필요하다면 websocket만 만들면돼
-//여기서 http가 필요한 이유는 views,static files, home, redirection을 원하기 때문
-
-
-
-//express는 http를 다루지만(ws지원안해) ws를 써볼게(합친대)
-//expree로 같은 서버에 ws기능을 설치 -> 같은 서버에서 http, websocket 둘다 작동시킬거임
-//app.listen(3000, handleListen); 이걸 바꿔줘야해
-// 모든 node.js에 내장되어있는 http package를 사용
 
 //실시간 채팅 프로그램
 // 1. 메세지 주고 받기
