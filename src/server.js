@@ -19,8 +19,12 @@ wss.on("connection", (socket) => {
     //console.log(socket);
 
     // ** socket에 있는 메서드로 브라우저에 "Welcome to Chat" 메세지를 보내보자
-    console.log("Connected to Browser ✅")
-    socket.send("hello~");
+    console.log("Connected to Browser ✅") //브라우저가 연결되면 출력
+    socket.on("close", () => console.log("Disconnected from Browser ❌")); //브라우저를 꺼지면 발생
+    socket.on("message", message => {
+        console.log(message.toString('utf-8'));
+    }); //브라우저가 서버에 메세지 보냈을 때
+    socket.send("hello~"); //message from backend to frontend 브라우저에 보내는 메세지
     //connection이 생겼을 때 socket으로 즉시 메세지(hello)를 보낼거고
     // app.js에서 세개의 이벤트(open, message, close) 작동
 
