@@ -1,3 +1,5 @@
+import http from "http";
+import WebSocket from "ws";
 import express from "express";
 
 const app = express();
@@ -5,11 +7,27 @@ const app = express();
 app.set('view engine', "pug");
 app.set("views", __dirname + "/views");
 app.use("/public", express.static(__dirname + "/public"));
-app.get("/", (req, res) => res.render("home"));
-app.get("/*", (req, res) => res.redirect("/")); 
+app.get("/", (_, res) => res.render("home"));
+app.get("/*", (_, res) => res.redirect("/")); 
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
-app.listen(3000, handleListen);
+// ws://localhost:3000도 처리할수있게됨
+// 이제 이 localhost는 동일한 포트에서 http, ws request 두개를 다 처리할수 있음
+
+const server = http.createServer(app); //express.js를 이용해 http서버 만듬. 이제 서버에서 websocket을 만들수있음
+const wss = new WebSocket.Server({ server }); //http서버 위에 websocket서버 만듬. (server를 꼭 넣어줄 필요는 없음)
+
+server.listen(3000, handleListen);
+
+//http와 wss 반드시 합칠필요는 없어 websocket만 필요하다면 websocket만 만들면돼
+//여기서 http가 필요한 이유는 views,static files, home, redirection을 원하기 때문
+
+
+
+//express는 http를 다루지만(ws지원안해) ws를 써볼게(합친대)
+//expree로 같은 서버에 ws기능을 설치 -> 같은 서버에서 http, websocket 둘다 작동시킬거임
+//app.listen(3000, handleListen); 이걸 바꿔줘야해
+// 모든 node.js에 내장되어있는 http package를 사용
 
 //실시간 채팅 프로그램
 // 1. 메세지 주고 받기
