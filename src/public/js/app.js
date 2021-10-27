@@ -6,3 +6,4 @@ alert("hi");
 //(Frontend 자바스크립트를 수정할때는 제외하고)
 // --> nodemon.json가서 폴더하나를 무시하도록 설정
 // "ignore"를 입력하고 src/public 폴더안에 모든 파일들 무시하도록.
+``

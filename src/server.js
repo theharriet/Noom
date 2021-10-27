@@ -6,11 +6,12 @@ app.set('view engine', "pug");
 app.set("views", __dirname + "/views");
 app.use("/public", express.static(__dirname + "/public"));
 
-
 //console.log("Hello");
 //여기서 express로 할일은 views를 정해주고 render해주는것
 // 나머지는 websocket에서 실시간으로 일어날거임
 app.get("/", (req, res) => res.render("home")); //여기서 필요한 유일한 route
+app.get("/*", (req, res) => res.redirect("/")); 
+//catchall url : 유져가 어떤 url로 이동하던지 홈으로 돌려보냄. 다른 url안쓸꺼니까 only home
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 app.listen(3000, handleListen);
