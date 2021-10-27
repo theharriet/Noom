@@ -12,53 +12,32 @@ app.get("/*", (_, res) => res.redirect("/"));
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
-const server = http.createServer(app); //express.js를 이용해 http서버 만듬. 이제 서버에서 websocket을 만들수있음
-const wss = new WebSocket.Server({ server }); //http서버 위에 websocket서버 만듬. (server를 꼭 넣어줄 필요는 없음)
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+//sort of fake database
+const sockets = []; //누군가 우리 서버에 연결하면 그 connection을 여기에 넣어줌
 
 wss.on("connection", (socket) => {
-    //console.log(socket);
-
-    // ** socket에 있는 메서드로 브라우저에 "Welcome to Chat" 메세지를 보내보자
-    console.log("Connected to Browser ✅") //브라우저가 연결되면 출력
-    socket.on("close", () => console.log("Disconnected from Browser ❌")); //브라우저를 꺼지면 발생
+    sockets.push(socket); //크롬(socket)연결하면 sockets array에 크롬을 넣어준다는 뜻
+    console.log("Connected to Browser ✅");
+    socket.on("close", () => console.log("Disconnected from Browser ❌")); 
     socket.on("message", message => {
-        console.log(message.toString('utf-8'));
-    }); //브라우저가 서버에 메세지 보냈을 때
-    socket.send("hello~"); //message from backend to frontend 브라우저에 보내는 메세지
-    //connection이 생겼을 때 socket으로 즉시 메세지(hello)를 보낼거고
-    // app.js에서 세개의 이벤트(open, message, close) 작동
-
-}); // 커넥션이 생기면 sokcet을 받는 다는게 직관적으로 보임
-
-//function handleConnection(socket){console.log(socket); // server.js의 socket은 브라우저와의 연결}
-//wss.on("connection", handleConnection);
-//Nico doesn't like this way. 하나의 큰 function안에 기능들을 넣는걸 선호.
-// connection안에 같은 역할을 하는 익명 함수를 만들거임 -> socket이 지금 어떤 상태인지 알기 더 쉬움
+        // socket.send(message.toString('utf-8')); //user로 부터 받은 메세지 그대로 보내줘보자 (chat myself)
+        // //브라우저 콘솔에 뜨는 채팅은 서버가 보낸거야
+        sockets.forEach(aSocket => aSocket.send(message.toString('utf-8'))); //aSocket -> 각각의 브라우저
+        //연결된 모든 socket들에게 접근
+    }); 
+    
+}); 
+// 서버 - 크롬 |||| 서버 - 엣지 ===> 이걸 크롬 - 서버 - 엣지 이렇게 연결하고싶음
+//문제는 연결이 되어있긴 한데 누구랑 연결되어있는지를 몰라 
 
 
 server.listen(3000, handleListen);
 
 
-/* 이런식으로 써줘도 상관없음
-function onSocketClose() {
-    console.log("Disconnected from Browser ❌")
-}
-
-function onSocketMessage(message) {
-    console.log(message.toString('utf-8'));
-}
-
-wss.on("connection", (socket) => {
-    console.log("Connected to Browser ✅")
-    socket.on("close", onSocketClose);
-    socket.on("message", onSocketMessage); 
-    socket.send("hello~"); 
-    
-});
-
-*/
-
-
+//익명 채팅
 
 
 //실시간 채팅 프로그램
