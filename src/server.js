@@ -17,6 +17,19 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 const server = http.createServer(app); //express.js를 이용해 http서버 만듬. 이제 서버에서 websocket을 만들수있음
 const wss = new WebSocket.Server({ server }); //http서버 위에 websocket서버 만듬. (server를 꼭 넣어줄 필요는 없음)
 
+function handleConnection(socket){
+    console.log(socket); //frontend랑 backend를 연결해달라고 해야 console에서 socket을 볼 수 있음. 지금은 연결된게 없어서 확인불가
+    //여기있는 socket이 frontend와 실시간으로 소통할 수 있어
+    // server.js의 socket은 브라우저와의 연결
+}
+wss.on("connection", handleConnection);
+//on 메서드는 event가 발동하는걸 기다려 -> 그 이벤트가 여기서는 connetction. 그리고 커넥션이 이루어지면 function을 작동시켜
+//     그리고 backend에 연결된 사람의 정보를 제공. 그게 socket에서 옴
+//socket : 연결된 브라우저와의 contact(연락)라인. 소켓을 이용하여 메세지를 주고받을수있어 나(서버)와 브라우저와의 연결
+//      이 소켓을 저장해야 handelConnection(socket) 해줄수있어
+
+
+
 server.listen(3000, handleListen);
 
 //http와 wss 반드시 합칠필요는 없어 websocket만 필요하다면 websocket만 만들면돼
