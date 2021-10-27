@@ -30,14 +30,16 @@ wss.on("connection", (socket) => {
     }); 
     
 }); 
-// 서버 - 크롬 |||| 서버 - 엣지 ===> 이걸 크롬 - 서버 - 엣지 이렇게 연결하고싶음
-//문제는 연결이 되어있긴 한데 누구랑 연결되어있는지를 몰라 
+//backend는 message들을 구분하지 못하기 때문에 (nickname인지 채팅메세지인지) json으로 보내자
+//그치만 app.js socket.send는 string만 보낼수 있어
+// JSON.stringify() , JSON.parse()
+
+//backend에서 socket으로 메세지를 전송하고 싶다면 object를 가져와서 string으로 만들어줘야함
+//frontend는 그 string을(new message) 가져와서 object로 다시 바꿔줘야함
 
 
 server.listen(3000, handleListen);
 
-
-//익명 채팅
 
 
 //실시간 채팅 프로그램
