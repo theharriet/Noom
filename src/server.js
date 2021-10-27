@@ -38,6 +38,29 @@ wss.on("connection", (socket) => {
 
 server.listen(3000, handleListen);
 
+
+/* 이런식으로 써줘도 상관없음
+function onSocketClose() {
+    console.log("Disconnected from Browser ❌")
+}
+
+function onSocketMessage(message) {
+    console.log(message.toString('utf-8'));
+}
+
+wss.on("connection", (socket) => {
+    console.log("Connected to Browser ✅")
+    socket.on("close", onSocketClose);
+    socket.on("message", onSocketMessage); 
+    socket.send("hello~"); 
+    
+});
+
+*/
+
+
+
+
 //실시간 채팅 프로그램
 // 1. 메세지 주고 받기
 // 2. 닉네임 설정
