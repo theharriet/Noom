@@ -40,7 +40,6 @@ wss.on("connection", (socket) => {
         
     }); 
     
-    
 }); 
 //backend는 message들을 구분하지 못하기 때문에 (nickname인지 채팅메세지인지) json으로 보내자
 //그치만 app.js socket.send는 string만 보낼수 있어
