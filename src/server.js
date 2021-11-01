@@ -1,6 +1,9 @@
 import http from "http";
-import WebSocket from "ws";
+import SocketIO from "socket.io"; //npm i socket.io
+//import WebSocket from "ws";
 import express from "express";
+
+
 
 const app = express();
 
@@ -12,37 +15,49 @@ app.get("/*", (_, res) => res.redirect("/"));
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
+// http://localhost:3000/socket.io/socket.io.js
+wsServer.on("connection", socket => {
+    console.log(socket); 
+}); //이코드 세줄로 frontend에서 backend를 연결해주고 있음
+
+
+/* function onSocketClose(){
+    console.log("Disconnected from Browser ❌");
+} */
+
+/* 
 const wss = new WebSocket.Server({ server });
-
-//sort of fake database
-const sockets = []; //누군가 우리 서버에 연결하면 그 connection을 여기에 넣어줌
-
+const sockets = []; 
 wss.on("connection", (socket) => {
-    sockets.push(socket); //크롬(socket)연결하면 sockets array에 크롬을 넣어준다는 뜻
-    socket["nickname"] = "Anon"; //익명으로 참가한 자 
+    sockets.push(socket); 
+    socket["nickname"] = "Anon"; 
     console.log("Connected to Browser ✅");
-    socket.on("close", () => console.log("Disconnected from Browser ❌")); 
+    socket.on("close", onSocketClose); 
     socket.on("message", msg => {
-        //console.log(message); //이 메세지는 string
         const message = JSON.parse(msg);
-        //console.log(message, msg.toString('utf-8'));
         switch (message.type){
             case "new_message" : sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload.toString('utf-8')}`));
-            //nickname property를 socket object에 저장
-            //sockets.forEach(aSocket => aSocket.send(message.payload.toString('utf-8')));
             case "nickname" : socket["nickname"] = message.payload;
-            //console.log(message.payload.toString('utf-8'));
         }
-        //이제 이 payload(nickname)을 socket안에 넣어줘야함 -> socket이 누구인지 알기 위해서
-        //그래서 socket에 새로운 item추가. 왜냐면 socket은 객체이므로.
     }); 
     
     
-}); 
+});  */
 
-server.listen(3000, handleListen);
+httpServer.listen(3000, handleListen);
 
+//socketIO는 실시간, 양방향, event기반 통신을 제공하는 framework. websocket보다 틴력성이 뛰어남, 재연결같은 부가기능있음
+// 프론트와 백엔드 간 실시간 통신을 가능하게 해주는 프레임워크 or 라이브러리
+// websocket은 socketIO가  실시간, 양방향, event기반 통신을 제공하는 방법 중 하나
+// 브라우저 또는 핸드폰이 websocket을 지원하지 않는다고 해도 socketIO는 다른방법으로 작동
+// firewall, proxy가 있어도 socketIO 작동
+
+//브라우저가 주는 webSocket은 socketIO와 호환이 안됨(socketIO가 더 많은 기능이 있어서) -> socketIo를 브라우저에 설치해야함
+//그래서 http://localhost:3000/socket.io/socket.io.js 이 url을 준거임
+// frontend에 import하기만 하면 frontends, backend에 설치될거임
+// app.js 다 날림
 
 
 //실시간 채팅 프로그램
