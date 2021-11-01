@@ -17,29 +17,21 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
 const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
-// http://localhost:3000/socket.io/socket.io.js
-wsServer.on("connection", socket => {
-    /* socket.on("enter_room", (msg, done) => {
-        console.log(msg);
-        setTimeout(() => {
-            done();  //서버는 backend에서 function을 호출하지만 function은 frontend에서 실행
-        }, 10000);
-    }); */
-   
-    
-    socket.on("enter_room", (roomName, done) => {
-        console.log(roomName);
-        setTimeout(() => {
-            done("hello from the Backend"); //backend에서 이 코드를 실행시키지 않음. 누군가 나의 database를 지우는 코드를 작성할수도있으므로..
-            // frontend에서 실행버튼을 누르는것뿐임
-        }, 10000);
+
+wsServer.on("connection", (socket) => {
+    socket.onAny((event) => {
+        console.log(`Socket Event: ${event}`);
     });
-
-    //socket.on("enter_room", (msg) => console.log(msg));
-
-    //console.log(socket); 
-}); //이코드 세줄로 frontend에서 backend를 연결해주고 있음
-
+    socket.on("enter_room", (roomName, done) => {
+        console.log(socket.id);
+        console.log(socket.rooms); //set { <socket.id> } 기본적으로 user는 이미 방에 들어가있음
+        socket.join(roomName);
+        console.log(socket.rooms); //set { <socket.id>, "roomName" }
+        setTimeout(() => {
+            done("hello from the Backend");
+        }, 10000);
+    }); 
+});
 
 
 /* function onSocketClose(){
@@ -66,18 +58,6 @@ wss.on("connection", (socket) => {
 });  */
 
 httpServer.listen(3000, handleListen);
-
-//socketIO는 실시간, 양방향, event기반 통신을 제공하는 framework. websocket보다 틴력성이 뛰어남, 재연결같은 부가기능있음
-// 프론트와 백엔드 간 실시간 통신을 가능하게 해주는 프레임워크 or 라이브러리
-// websocket은 socketIO가  실시간, 양방향, event기반 통신을 제공하는 방법 중 하나
-// 브라우저 또는 핸드폰이 websocket을 지원하지 않는다고 해도 socketIO는 다른방법으로 작동
-// firewall, proxy가 있어도 socketIO 작동
-// 서버가 꺼지면 socketkIO가 재연결을 계속 시도 (브라우저콘솔창에서 확인 가능)
-
-//브라우저가 주는 webSocket은 socketIO와 호환이 안됨(socketIO가 더 많은 기능이 있어서) -> socketIo를 브라우저에 설치해야함
-//그래서 http://localhost:3000/socket.io/socket.io.js 이 url을 준거임
-// frontend에 import하기만 하면 frontends, backend에 설치될거임
-// app.js 다 날림
 
 
 //실시간 채팅 프로그램
