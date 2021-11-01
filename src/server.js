@@ -20,6 +20,7 @@ const sockets = []; //누군가 우리 서버에 연결하면 그 connection을 
 
 wss.on("connection", (socket) => {
     sockets.push(socket); //크롬(socket)연결하면 sockets array에 크롬을 넣어준다는 뜻
+    socket["nickname"] = "Anon"; //익명으로 참가한 자 
     console.log("Connected to Browser ✅");
     socket.on("close", () => console.log("Disconnected from Browser ❌")); 
     socket.on("message", msg => {
@@ -27,33 +28,18 @@ wss.on("connection", (socket) => {
         const message = JSON.parse(msg);
         //console.log(message, msg.toString('utf-8'));
         switch (message.type){
-            case "new_message" : sockets.forEach(aSocket => aSocket.send(message.payload.toString('utf-8')));
-            case "nickname" : console.log(message.payload.toString('utf-8'));
+            case "new_message" : sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload.toString('utf-8')}`));
+            //nickname property를 socket object에 저장
+            //sockets.forEach(aSocket => aSocket.send(message.payload.toString('utf-8')));
+            case "nickname" : socket["nickname"] = message.payload;
+            //console.log(message.payload.toString('utf-8'));
         }
-
-        // if문을 switch문으로 바꿨음
-        // if(message.type === "new_message"){
-        //     sockets.forEach(aSocket => aSocket.send(message.payload.toString('utf-8')));
-        // }else if(message.type === "nickname"){
-        //     console.log(message.payload.toString('utf-8'));
-        // }
-        
+        //이제 이 payload(nickname)을 socket안에 넣어줘야함 -> socket이 누구인지 알기 위해서
+        //그래서 socket에 새로운 item추가. 왜냐면 socket은 객체이므로.
     }); 
     
     
 }); 
-//backend는 message들을 구분하지 못하기 때문에 (nickname인지 채팅메세지인지) json으로 보내자
-//그치만 app.js socket.send는 string만 보낼수 있어
-// JSON.stringify() , JSON.parse()
-//JSON.stringify() : Javascript object -> String
-//JSON.parse() : String -> Javascript object
-
-
-//backend에서 socket으로 메세지를 전송하고 싶다면 object를 가져와서 string으로 만들어줘야함
-//frontend는 그 string을(new message) 가져와서 object로 다시 바꿔줘야함
-
-//backend에서 string으로 온 메세지를 javascript object로 바꿔주자
-
 
 server.listen(3000, handleListen);
 

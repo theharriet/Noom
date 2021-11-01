@@ -22,23 +22,26 @@ socket.addEventListener("open", () => {
     console.log("Connected to Server ✅")
 }); 
 
+//메시지 받을 때 실행되는 코드
 socket.addEventListener("message", (message) => {
     //console.log("New message: ", message.data);
-    const li = document.createElement("li");
-    li.innerText = message.data;
-    messageList.append(li);
+    //handleSubmit으로 보내버림
 });
 
 socket.addEventListener("close", () => {
     console.log("Disconnected from Server ❌"); 
 })
 
-
+//나를 제외한 모든 사람에게 메시지 보내는 function
 //backend로 보내는 메시지 (chat message)
 function handleSubmit(event) {
     event.preventDefault();
     const input = messageForm.querySelector("input");
     socket.send(makeMessage("new_message", input.value));
+    const li = document.createElement("li");
+    //li.innerText = message.data;
+    li.innerText = `you: ${input.value}`;
+    messageList.append(li);
     input.value = ""; 
 }
 
@@ -47,6 +50,7 @@ function handleNickSubmit(event) {
     event.preventDefault();
     const input = nickForm.querySelector("input");
     socket.send(makeMessage("nickname", input.value));
+    input.value = "";
 }
 //javascript object를 string으로 만드는 방법 그리고 string을 javascript object로 바꾸는 방법
 // -------------> JSON.stringify()
