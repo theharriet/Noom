@@ -19,14 +19,22 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 // http://localhost:3000/socket.io/socket.io.js
 wsServer.on("connection", socket => {
-    socket.on("enter_room", (msg, done) => {
+    /* socket.on("enter_room", (msg, done) => {
         console.log(msg);
         setTimeout(() => {
-            done();
+            done();  //서버는 backend에서 function을 호출하지만 function은 frontend에서 실행
+        }, 10000);
+    }); */
+   
+    
+    socket.on("enter_room", (roomName, done) => {
+        console.log(roomName);
+        setTimeout(() => {
+            done("hello from the Backend"); //backend에서 이 코드를 실행시키지 않음. 누군가 나의 database를 지우는 코드를 작성할수도있으므로..
+            // frontend에서 실행버튼을 누르는것뿐임
         }, 10000);
     });
-    //서버는 backend에서 function을 호출하지만 function은 frontend에서 실행
-    
+
     //socket.on("enter_room", (msg) => console.log(msg));
 
     //console.log(socket); 
@@ -38,7 +46,7 @@ wsServer.on("connection", socket => {
     console.log("Disconnected from Browser ❌");
 } */
 
-/* 
+/*  메세지 타입이 많아지면 곤란..
 const wss = new WebSocket.Server({ server });
 const sockets = []; 
 wss.on("connection", (socket) => {
@@ -64,6 +72,7 @@ httpServer.listen(3000, handleListen);
 // websocket은 socketIO가  실시간, 양방향, event기반 통신을 제공하는 방법 중 하나
 // 브라우저 또는 핸드폰이 websocket을 지원하지 않는다고 해도 socketIO는 다른방법으로 작동
 // firewall, proxy가 있어도 socketIO 작동
+// 서버가 꺼지면 socketkIO가 재연결을 계속 시도 (브라우저콘솔창에서 확인 가능)
 
 //브라우저가 주는 webSocket은 socketIO와 호환이 안됨(socketIO가 더 많은 기능이 있어서) -> socketIo를 브라우저에 설치해야함
 //그래서 http://localhost:3000/socket.io/socket.io.js 이 url을 준거임
