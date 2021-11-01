@@ -1,14 +1,23 @@
 //user가 chat에 참가하고 싶으면 room을 먼저 만들도록. no public chat anymore
-const socket = io(); //이러면 끝. port, ws를 쓸 필요 없음
-//이제 이러면 브라우저 콘솔에 io를 찍어보면
-/* ƒ lookup(uri, opts) {
-    if (_typeof(uri) === "object") {
-      opts = uri;
-      uri = undefined;
-    }
+// socketIO가 이미 room 기능 갖고있음
+const socket = io();
 
-    opts = opts || {};
-    var parsed = url(uri, opts.path || "/socket.io");
-    var source = … */
-//io는 자동적으로 backend socket.io와 연결해주는 function
-//io function은 알아서 socket.io를 실행하고 있는 서버를 찾음
+const welcome = document.getElementById("welcome");
+const form = welcome.querySelector("form");
+
+function handleRoomSubmit(event){
+    event.preventDefault();
+    const input = form.querySelector("input");
+    socket.emit("enter_room", { payload: input.value}, () => {
+        console.log("Server is done!");
+    }); //전에는 메시지만 보낼수 있었는데 object도 보낼수있음
+    input.value = "";
+}
+
+form.addEventListener("submit", handleRoomSubmit);
+
+//socket.emit()- 첫번째 arg: event 이름, 두번째 arg: payload(you want to send), 세번째 arg: 서버에서 호출하는 function
+
+//1. 특정한 event(custom event)를 emit할수있음 (not only message)
+//2. object 전송 가능
+//3. callback : 서버로 부터 실행되는 function

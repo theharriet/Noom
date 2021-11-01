@@ -19,8 +19,19 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 // http://localhost:3000/socket.io/socket.io.js
 wsServer.on("connection", socket => {
-    console.log(socket); 
+    socket.on("enter_room", (msg, done) => {
+        console.log(msg);
+        setTimeout(() => {
+            done();
+        }, 10000);
+    });
+    //서버는 backend에서 function을 호출하지만 function은 frontend에서 실행
+    
+    //socket.on("enter_room", (msg) => console.log(msg));
+
+    //console.log(socket); 
 }); //이코드 세줄로 frontend에서 backend를 연결해주고 있음
+
 
 
 /* function onSocketClose(){
