@@ -23,14 +23,23 @@ wsServer.on("connection", (socket) => {
         console.log(`Socket Event: ${event}`);
     });
     socket.on("enter_room", (roomName, done) => {
-        console.log(socket.id);
-        console.log(socket.rooms); //set { <socket.id> } 기본적으로 user는 이미 방에 들어가있음
         socket.join(roomName);
-        console.log(socket.rooms); //set { <socket.id>, "roomName" }
-        setTimeout(() => {
-            done("hello from the Backend");
-        }, 10000);
+        done();
+        socket.to(roomName).emit("welcome"); //나를 제외한 모든 사람에게 event emit
     }); 
+
+    socket.on("disconnecting", () => {
+        socket.rooms.forEach((room) => socket.to(room).emit("bye"));
+    }); // disconnect(연결이 완전히 끊어짐)이랑은 다름. 접속을 중단할거지만 아직 완전히 room을 나가지는 안음
+    //연결이 완전히 끊기기 전에 메시지를 보낼수 있다는 뜻
+    //console.log(socket.rooms); 방의 id array가 나오는데 그걸로 forEach 돌림
+
+    socket.on("new_message", (msg, room, done) => { 
+        socket.to(room).emit("new_message", msg);
+        done(); //위 모든게 끝나면 addMessage funciton이 호출됨
+    })
+    //msg : app.js의handleMessageSubmit에서 오는 input.value
+    //room: 어떤 방으로 메시지를 보내야할지 모르니까.. roomName
 });
 
 
