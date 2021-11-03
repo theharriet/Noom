@@ -4,7 +4,6 @@ import SocketIO from "socket.io"; //npm i socket.io
 import express from "express";
 
 //https://socket.io/docs/v4/server-api/#flag-volatile-1
-//코드챌린지 - 방 입장전에 nickname을 받아 입장시 "00님이 입장하였습니다" 메시지 뿌리기
 
 const app = express();
 
@@ -19,15 +18,34 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
+function publicRooms(){
+    const {
+        sockets: {
+            adapter: {sids, rooms},
+        },
+    } = wsServer;
+    //const {sockets: {adapter: {sids, rooms}}} = wsServer;
+    // 아래 두줄을 위 한줄로 가능
+    // const sids = wsServer.sockets.adapter.sids;
+    // const rooms = wsServer.sockets.adapter.rooms;
+    const publicRooms = [];
+    rooms.forEach((_, key) => {
+        if(sids.get(key) === undefined){
+            publicRooms.push(key);
+        }
+    });
+    return publicRooms;
+}
+
 wsServer.on("connection", (socket) => {
     //socket.socketJoin("announcement"); socket이 연결했을때 모든 socket이 announcement라는 방에 입장하게 만듬
-    //socket["nickname"] = "Anon"; //이제 누군가 입장하면 입장했다고 말해줄수있음
+    socket["nickname"] = "Anon"; //이제 누군가 입장하면 입장했다고 말해줄수있음
     socket.onAny((event) => {
+        //console.log(wsServer.sockets.adapter);
         console.log(`Socket Event: ${event}`);
     });
-    socket.on("enter_room", (roomName, nickname, done) => {
+    socket.on("enter_room", (roomName, done) => {
         socket.join(roomName);
-        socket["nickname"] = nickname;
         done();
         socket.to(roomName).emit("welcome", socket.nickname);
     }); 
@@ -38,9 +56,22 @@ wsServer.on("connection", (socket) => {
         socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
         done();
     })
-    //socket.on("nickname", nickname => socket["nickname"] = nickname)
+    socket.on("nickname", nickname => socket["nickname"] = nickname)
     //nickname이벤트가 발생하면 nickname(object)을 가져와서 socket에 저장 
 });
+
+//console.log(wsServer.sockets.adapter); 서버에 있는 모든 방 리스트를 보고 private & public rooms 찾아보기
+// map에서 room ID를 socket ID에서 찾을 수 있다면 그건 private room
+// room ID를 socket ID에서 찾을 수 없다면 public room
+
+
+// ***********Adapter
+// DB를 사용하여 다른 서버들 사이에 실시간 어플리케이션을 동기화 하는것
+// 같은 connection이어도 서버들은 같은 memory pool을 공유하지않음
+// 사용자가 보는 화면이 같은 프론트엔드여도 서버는 다를수있음 (모든 클라이언트가 같은 서버에 연결되는게아냐)
+// 서버1사용자가 서버2사용자에게 메세지를 보낼 수 있게 해주는게 adapter
+// 클라이언트1 - 서버1 - adapter - db - adapter - 서버2 - 클라이언트2
+
 
 
 /* function onSocketClose(){

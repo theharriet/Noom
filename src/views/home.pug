@@ -12,14 +12,13 @@ html(lang="en")
         main 
             div#welcome
                 form
-                    input#roomname(placeholder="room name", required, type="text")
-                    input#nickname(placeholder="nickname", required, type="text")
+                    input(placeholder="room name", required, type="text") 
                     button Enter Room
             div#room
                 h3
                 ul
-                //- form#name
-                    input(placeholder="nickname", required, type="text")
+                form#name
+                    input(placeholder="nickname", required, type="text") 
                     button Save
                 form#msg
                     input(placeholder="message", required, type="text") 
