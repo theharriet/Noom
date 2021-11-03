@@ -38,6 +38,11 @@ function publicRooms(){
     return publicRooms; //현재 우리 서버 안에 있는 모든 방의 array
 }
 
+// 우리 방이 얼마나 큰지 계산. welcome event, disconnecting event 보낼때 같이 보냄
+function countRoom(roomName){
+   return wsServer.sockets.adapter.rooms.get(roomName)?.size
+} // get(roomName)? ==> roomName 찾을수도 있고 아닐수도 있고..optional
+
 wsServer.on("connection", (socket) => {
     //socket.socketJoin("announcement"); socket이 연결했을때 모든 socket이 announcement라는 방에 입장하게 만듬
     socket["nickname"] = "Anon"; //이제 누군가 입장하면 입장했다고 말해줄수있음
@@ -48,12 +53,12 @@ wsServer.on("connection", (socket) => {
     socket.on("enter_room", (roomName, done) => {
         socket.join(roomName);
         done();
-        socket.to(roomName).emit("welcome", socket.nickname);//하나의소켓에만 메시지 보내기
+        socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));//하나의소켓에만 메시지 보내기
         wsServer.sockets.emit("room_change", publicRooms()); //모든 소켓에 메시지 보내기(어플리케이션 안에 있는 모든 방에). room_change라는 event를 보내고 그 payload는 publicRooms 함수의 결과(현재 우리 서버 안에 있는 모든 방의 array)로.
     }); 
     socket.on("disconnecting", () => {
-        socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickname));
-    }); 
+        socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1));
+    });  // countRoom(roomName) -1 ==> 아직 룸을 떠난게 아니라서 우리까지 포함됨
     //클라이언트가 바이바이 종료 메시지를 모두에게 보낸다음 우리는 모두에게 그 방이 변경됐다고 알려줌
     socket.on("disconnect", () => { 
         wsServer.sockets.emit("room_change", publicRooms());

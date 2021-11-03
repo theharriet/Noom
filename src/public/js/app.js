@@ -55,11 +55,16 @@ function handleRoomSubmit(event){
 form.addEventListener("submit", handleRoomSubmit);
 
 //접속한 user가 누구인지 알려줌
-socket.on("welcome", (user) => {
+socket.on("welcome", (user, newCount) => {
+    const h3 = room.querySelector("h3");
+    h3.innerText = `Room ${roomName} (${newCount})`; 
+    //nico생각에는 title을 새로고침해주는 function을 만들어주는게 더 나을거같대..?#2.10-3:50
     addMessage(`${user} arrived!`);
 }); 
 //어떤 user가 나갔는지 알려줌
-socket.on("bye", (left) => {
+socket.on("bye", (left, newCount) => {
+    const h3 = room.querySelector("h3");
+    h3.innerText = `Room ${roomName} (${newCount})`;
     addMessage(`${left} left!`);
 });
 
