@@ -4,6 +4,7 @@ import SocketIO from "socket.io"; //npm i socket.io
 import express from "express";
 
 //https://socket.io/docs/v4/server-api/#flag-volatile-1
+//코드챌린지 - 방 입장전에 nickname을 받아 입장시 "00님이 입장하였습니다" 메시지 뿌리기
 
 const app = express();
 
@@ -20,12 +21,13 @@ const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
     //socket.socketJoin("announcement"); socket이 연결했을때 모든 socket이 announcement라는 방에 입장하게 만듬
-    socket["nickname"] = "Anon"; //이제 누군가 입장하면 입장했다고 말해줄수있음
+    //socket["nickname"] = "Anon"; //이제 누군가 입장하면 입장했다고 말해줄수있음
     socket.onAny((event) => {
         console.log(`Socket Event: ${event}`);
     });
-    socket.on("enter_room", (roomName, done) => {
+    socket.on("enter_room", (roomName, nickname, done) => {
         socket.join(roomName);
+        socket["nickname"] = nickname;
         done();
         socket.to(roomName).emit("welcome", socket.nickname);
     }); 
@@ -36,7 +38,7 @@ wsServer.on("connection", (socket) => {
         socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
         done();
     })
-    socket.on("nickname", nickname => socket["nickname"] = nickname)
+    //socket.on("nickname", nickname => socket["nickname"] = nickname)
     //nickname이벤트가 발생하면 nickname(object)을 가져와서 socket에 저장 
 });
 
