@@ -18,6 +18,7 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
+//열려있는 채팅방(public rooms)들을 알기 위해서. (except private rooms)
 function publicRooms(){
     const {
         sockets: {
@@ -34,7 +35,7 @@ function publicRooms(){
             publicRooms.push(key);
         }
     });
-    return publicRooms;
+    return publicRooms; //현재 우리 서버 안에 있는 모든 방의 array
 }
 
 wsServer.on("connection", (socket) => {
@@ -47,11 +48,16 @@ wsServer.on("connection", (socket) => {
     socket.on("enter_room", (roomName, done) => {
         socket.join(roomName);
         done();
-        socket.to(roomName).emit("welcome", socket.nickname);
+        socket.to(roomName).emit("welcome", socket.nickname);//하나의소켓에만 메시지 보내기
+        wsServer.sockets.emit("room_change", publicRooms()); //모든 소켓에 메시지 보내기(어플리케이션 안에 있는 모든 방에). room_change라는 event를 보내고 그 payload는 publicRooms 함수의 결과(현재 우리 서버 안에 있는 모든 방의 array)로.
     }); 
     socket.on("disconnecting", () => {
         socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickname));
     }); 
+    //클라이언트가 바이바이 종료 메시지를 모두에게 보낸다음 우리는 모두에게 그 방이 변경됐다고 알려줌
+    socket.on("disconnect", () => { 
+        wsServer.sockets.emit("room_change", publicRooms());
+    })
     socket.on("new_message", (msg, room, done) => { 
         socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
         done();

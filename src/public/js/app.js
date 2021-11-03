@@ -66,6 +66,23 @@ socket.on("bye", (left) => {
 socket.on("new_message", addMessage);
 // = socket.on("new_message", (msg) => {addMessage(msg)}); 
 
+//브라우저 콘솔에 새로운 방이 생기거나 없어질때(user가 떠나거나) 알림 받음
+//socket.on("room_change", console.log);
+// = socket.on("room_change", (msg) => console.log(msg));
+
+//room_change event가 발생했을 때 나한테 rooms배열을 줄거여
+socket.on("room_change", (rooms) => {
+    const roomList = welcome.querySelector("ul");
+    roomList.innerHTML = ""; //방 목록을 비워줘서 항상 새로운 list가 되도록.
+    if(rooms.length === 0){
+        return;
+    } //내 어플리케이션에 room이 하나도 없이 왔을 때 list를 비워줌
+    rooms.forEach((room) => {
+        const li = document.createElement("li");
+        li.innerText = room;
+        roomList.append(li);
+    });
+});
 
 //socket.emit()- 첫번째 arg: event 이름, 두번째 arg: payload(you want to send), 세번째 arg: 서버에서 호출하는 function
 
