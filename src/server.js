@@ -3,7 +3,7 @@ import SocketIO from "socket.io"; //npm i socket.io
 //import WebSocket from "ws";
 import express from "express";
 
-
+//https://socket.io/docs/v4/server-api/#flag-volatile-1
 
 const app = express();
 
@@ -19,27 +19,25 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
+    //socket.socketJoin("announcement"); socket이 연결했을때 모든 socket이 announcement라는 방에 입장하게 만듬
+    socket["nickname"] = "Anon"; //이제 누군가 입장하면 입장했다고 말해줄수있음
     socket.onAny((event) => {
         console.log(`Socket Event: ${event}`);
     });
     socket.on("enter_room", (roomName, done) => {
         socket.join(roomName);
         done();
-        socket.to(roomName).emit("welcome"); //나를 제외한 모든 사람에게 event emit
+        socket.to(roomName).emit("welcome", socket.nickname);
     }); 
-
     socket.on("disconnecting", () => {
-        socket.rooms.forEach((room) => socket.to(room).emit("bye"));
-    }); // disconnect(연결이 완전히 끊어짐)이랑은 다름. 접속을 중단할거지만 아직 완전히 room을 나가지는 안음
-    //연결이 완전히 끊기기 전에 메시지를 보낼수 있다는 뜻
-    //console.log(socket.rooms); 방의 id array가 나오는데 그걸로 forEach 돌림
-
+        socket.rooms.forEach((room) => socket.to(room).emit("bye", socket.nickname));
+    }); 
     socket.on("new_message", (msg, room, done) => { 
-        socket.to(room).emit("new_message", msg);
-        done(); //위 모든게 끝나면 addMessage funciton이 호출됨
+        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
+        done();
     })
-    //msg : app.js의handleMessageSubmit에서 오는 input.value
-    //room: 어떤 방으로 메시지를 보내야할지 모르니까.. roomName
+    socket.on("nickname", nickname => socket["nickname"] = nickname)
+    //nickname이벤트가 발생하면 nickname(object)을 가져와서 socket에 저장 
 });
 
 
