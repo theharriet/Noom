@@ -1,9 +1,16 @@
 import http from "http";
-import SocketIO from "socket.io"; //npm i socket.io
+import { Server } from "socket.io"; //npm i socket.io
+import { instrument } from "@socket.io/admin-ui";
 //import WebSocket from "ws";
 import express from "express";
 
 //https://socket.io/docs/v4/server-api/#flag-volatile-1
+
+//npm i @socket.io/admin-ui or npm i "@socket.io/admin-ui"
+// 나의 모든 socket, room, client 확인 가능 - 현재 만들어져있는 방, 접속한 사람수 등등 소켓 접속도 끊어버릴수잇음 like 강퇴
+//https://socket.io/docs/v4/admin-ui/
+// instrument를 설치하고 server를 만들었던 방식 변경해줌
+
 
 const app = express();
 
@@ -16,7 +23,18 @@ app.get("/*", (_, res) => res.redirect("/"));
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
 const httpServer = http.createServer(app);
-const wsServer = SocketIO(httpServer);
+const wsServer = new Server(httpServer, {
+    cors: {
+      origin: ["https://admin.socket.io"],
+      credentials: true
+    }
+  });
+  //"https://admin.socket.io" 이 url에서 localhost 3000에 엑세스 할거야
+  // 이게 없다면 나의 server ulr을 넣어주면됨
+
+  instrument(wsServer, {
+    auth: false
+  });
 
 //열려있는 채팅방(public rooms)들을 알기 위해서. (except private rooms)
 function publicRooms(){
@@ -25,10 +43,6 @@ function publicRooms(){
             adapter: {sids, rooms},
         },
     } = wsServer;
-    //const {sockets: {adapter: {sids, rooms}}} = wsServer;
-    // 아래 두줄을 위 한줄로 가능
-    // const sids = wsServer.sockets.adapter.sids;
-    // const rooms = wsServer.sockets.adapter.rooms;
     const publicRooms = [];
     rooms.forEach((_, key) => {
         if(sids.get(key) === undefined){
