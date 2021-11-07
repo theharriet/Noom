@@ -10,6 +10,7 @@ import express from "express";
 // 나의 모든 socket, room, client 확인 가능 - 현재 만들어져있는 방, 접속한 사람수 등등 소켓 접속도 끊어버릴수잇음 like 강퇴
 //https://socket.io/docs/v4/admin-ui/
 // instrument를 설치하고 server를 만들었던 방식 변경해줌
+//https://admin.socket.io privat창으로 켜서 접속 후 http://localhost:3000/admin 넣어주고 path는 필요없음 connect
 
 
 const app = express();
