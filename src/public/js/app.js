@@ -21,5 +21,5 @@ getMedia();
 // constraints - 우리가 얻고싶은것
 //https://developer.mozilla.org/ko/docs/Web/API/MediaDevices/getUserMedia
 
-//#3.0 4:00 plz.. why not? when....
+//#3.0 4:00
 
